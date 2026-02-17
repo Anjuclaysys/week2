@@ -1,6 +1,8 @@
-from fastapi import APIRouter, HTTPException
-from app.schema import UserCreate, UserResponse, UserUpdate
+from fastapi import APIRouter, Depends, HTTPException
+
+from app.auth import create_access_token, current_user
 from app.db import user_db
+from app.schema import UserCreate, UserResponse, UserUpdate
 
 router = APIRouter()
 
@@ -13,6 +15,20 @@ def root():
 @router.get("/health")
 def health():
     return {"status": "healthy"}
+
+
+@router.post("/login")
+def login(username: str, password: str):
+    if username != "admin" or password != "password":
+        raise HTTPException(status_code=401, detail="invalid credentials")
+    access_token = create_access_token({"sub": username})
+
+    return {"access_token": access_token, "token_type": "bearer"}
+
+
+@router.get("/protected")
+def protected_route(current_user: str = Depends(current_user)):
+    return {"message": f"Hello {current_user},this is a protected route"}
 
 
 @router.post("/users", response_model=UserResponse)
