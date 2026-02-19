@@ -1,7 +1,9 @@
 from fastapi import APIRouter, Depends, HTTPException
+from sqlalchemy.orm import session
 
 from app.auth import create_access_token, current_user
-from app.db import user_db
+from app.database import get_db
+from app import crud
 from app.schema import UserCreate, UserResponse, UserUpdate
 
 router = APIRouter()
@@ -32,32 +34,32 @@ def protected_route(current_user: str = Depends(current_user)):
 
 
 @router.post("/users", response_model=UserResponse)
-def create_user(user: UserCreate):
-    user_id = len(user_db) + 1
-
-    user_db[user_id] = {"id": user_id, **user.model_dump()}
-    print(user_db[user_id])
-
-    return user_db[user_id]
+def create_user(user: UserCreate, db: session = Depends(get_db)):
+    return crud.create_user(db, user)
 
 
 @router.get("/users/{id}", response_model=UserResponse)
-def get_user(id: int):
-    if id not in user_db:
+def get_user(id: int, db: session = Depends(get_db)):
+    user = crud.get_user(db, id)
+    if not user:
         raise HTTPException(status_code=404, detail="user not found")
-    return user_db[id]
+    return user
 
 
 @router.put("/users/{id}", response_model=UserResponse)
-def update_user(id: int, user: UserUpdate):
-    if id not in user_db:
+def update_user(id: int, user: UserUpdate, db: session = Depends(get_db)):
+    updated_user = crud.update_user(db, id, user)
+    if not update_user:
         raise HTTPException(status_code=404, detail="User not found")
-    stored_user = user_db[id]
 
-    if user.name is not None:
-        stored_user["name"] = user.name
-    if user.email is not None:
-        stored_user["email"] = user.email
+    return update_user
 
-    user_db[id] = stored_user
-    return stored_user
+
+@router.delete("/users/{id}", response_model=UserResponse)
+def delete_user(id: int, db: session = Depends(get_db)):
+    deleted_user = crud.delete_user(db, id)
+
+    if not deleted_user:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    return deleted_user
