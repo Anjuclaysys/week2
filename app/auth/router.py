@@ -11,7 +11,6 @@ router = APIRouter(
 
 @router.post("/login")
 def login(data: LoginRequest):
-    # Temporary hardcoded validation
     if data.username != "admin" or data.password != "password":
         raise HTTPException(
             detail="Invalid credentials",

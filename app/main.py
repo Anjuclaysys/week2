@@ -10,7 +10,7 @@ from app.core.logging_middleware import LoggingMiddleware
 from app.users.routes import router as user_router
 
 load_dotenv()
-# print(os.getenv("SECRET_KEY"))
+
 
 app = FastAPI()
 

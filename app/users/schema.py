@@ -12,17 +12,6 @@ class UserBase(BaseModel):
     model_config = {"extra": "forbid"}
 
 
-class UserCreate(UserBase):
-    # password: Annotated[
-    #     str,
-    #     Field(
-    #         min_length=8, max_length=100,
-    # pattern=r"^(?=.*[A-Z])(?=.*[a-z])(?=.*\d).+$"
-    #     ),
-    # ]
-    pass
-
-
 class UserUpdate(BaseModel):
     name: Optional[Annotated[str, Field(min_length=2, max_length=50)]] = None
     email: Optional[EmailStr] = None

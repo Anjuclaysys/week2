@@ -7,8 +7,6 @@ from app.users.repository import UserRepository
 from app.users.schema import UserCreate, UserResponse, UserUpdate
 from app.users.service import UserService
 
-# from app.auth import create_access_token, current_user
-
 
 router = APIRouter(prefix="/users", tags=["Users"])
 
@@ -26,15 +24,6 @@ def root():
 @router.get("/health")
 def health():
     return {"status": "healthy"}
-
-
-# @router.post("/login")
-# def login(username: str, password: str):
-#     if username != "admin" or password != "password":
-#         raise HTTPException(status_code=401, detail="invalid credentials")
-#     access_token = create_access_token({"sub": username})
-
-#     return {"access_token": access_token, "token_type": "bearer"}
 
 
 @router.get("/protected")
