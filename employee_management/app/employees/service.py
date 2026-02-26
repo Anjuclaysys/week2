@@ -1,6 +1,6 @@
 from app.employees.repository import EmployeeRepository
 from app.employees.model import Employee
-from app.employees.schema import EmployeeCreate
+from app.employees.schema import EmployeeCreate, EmployeeUpdate
 from app.core.security import Security
 
 
@@ -33,13 +33,20 @@ class EmployeeService:
             raise ValueError("employee not found")
         return employee
 
-    def update_employee(self, employee_id: int, data: EmployeeCreate):
+    def update_employee(self, employee_id: int, data: EmployeeUpdate):
         employee = self.repository.get_by_id(employee_id)
+
         if not employee:
             raise ValueError("employee not found")
 
-        for key, value in data.model_dump().items():
-            setattr(employee, key, value)
+        update_data = data.model_dump(exclude_unset=True)
+
+        for key, value in update_data.items():
+            if key == "password":
+                if value:  # update only if provided
+                    employee.password = Security.hash_password(value)
+            else:
+                setattr(employee, key, value)
 
         return self.repository.update(employee)
 

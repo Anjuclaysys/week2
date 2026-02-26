@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
 from app.core.database import get_db
-from app.employees.schema import EmployeeCreate, EmployeeResponse
+from app.employees.schema import EmployeeCreate, EmployeeResponse, EmployeeUpdate
 from app.employees.service import EmployeeService
 from app.auth.dependencies import get_current_user
 
@@ -46,13 +46,13 @@ def get_employee(
 @router.put("/{employee_id}")
 def update_employee(
     employee_id: int,
-    data: EmployeeCreate,
+    data: EmployeeUpdate,
     service: EmployeeService = Depends(get_employee_service),
 ):
     try:
         return service.update_employee(employee_id, data)
     except ValueError as e:
-        raise HTTPException(detail=str(e))
+        raise HTTPException(status_code=400, detail=str(e))
 
 
 @router.delete("/{employee_id}")
